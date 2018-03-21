@@ -16,6 +16,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import sortBy from "sort-by";
+import _ from "lodash";
 
 const DATA = {
   title: "Menu",
@@ -29,8 +30,39 @@ const DATA = {
   ]
 };
 
-function Menu() {
-  return <div>Open the console, you have failing tests.</div>;
+function renderMenu(type) {
+  ReactDOM.render(<Menu type={type} />, document.getElementById("app"));
+}
+
+function onMenuChanged(event) {
+  var type = event.target.value;
+  renderMenu(type);
+}
+
+function MenuTypeDropdown() {
+  var types = _(DATA.items).map(i => i.type).uniq().value();
+  return <select onChange={onMenuChanged}>
+    {types.map((type, idx) => (
+      <option key={idx} value={type}>{type}</option>
+    ))}
+  </select>;
+}
+
+function Menu(props) {
+  var type = props.type || 'mexican';
+  return (
+    <div>
+      <h1>{DATA.title}</h1>
+      <ul>
+        {DATA.items
+          .filter(item => item.type === type)
+          .sort(sortBy('name'))
+          .map(item => <li key={item.id}>{item.name}</li>)}
+      </ul>
+      <h3>Select type of cuisine</h3>
+      <MenuTypeDropdown />
+    </div>
+  );
 }
 
 ReactDOM.render(<Menu />, document.getElementById("app"), () => {
