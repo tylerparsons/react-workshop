@@ -14,6 +14,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
+import _ from "lodash";
+
 const styles = {};
 
 styles.tab = {
@@ -35,17 +37,38 @@ styles.panel = {
 };
 
 class Tabs extends React.Component {
+  state = {
+    activeTabId: null
+  }
+
+  updateActiveTab = (tabId) => {
+    this.setState({activeTabId: tabId});
+  }
+
   render() {
+    const data = this.props.data;
+    const activeTabId = this.state.activeTabId || (data[0] && data[0].id);
+    const activeTabData = _(data).find(d => d.id === activeTabId);
+    const tabs = data.map(d => {
+      if (d.id === activeTabId) {
+        return <div key={d.id} className="Tab" style={styles.activeTab}>
+          {d.name}
+        </div>;
+      }
+      else {
+        return <div
+          key={d.id} className="Tab" style={styles.tab}
+          onClick={() => this.updateActiveTab(d.id)}>
+          {d.name}
+        </div>;
+      }
+    });
+
     return (
       <div className="Tabs">
-        <div className="Tab" style={styles.activeTab}>
-          Active
-        </div>
-        <div className="Tab" style={styles.tab}>
-          Inactive
-        </div>
+        {tabs}
         <div className="TabPanel" style={styles.panel}>
-          Panel
+        {activeTabData.description}
         </div>
       </div>
     );
@@ -74,10 +97,15 @@ const DATA = [
     name: "Brazil",
     description: "Sunshine, beaches, and Carnival"
   },
-  { id: 3, name: "Russia", description: "World Cup 2018!" }
+  {
+    id: 3,
+    name: "Russia",
+    description: "World Cup 2018!"
+  }
 ];
 
 ReactDOM.render(
   <App countries={DATA} />,
-  document.getElementById("app")
+  document.getElementById("app"),
+  () => { require("./tests").run(); }
 );
