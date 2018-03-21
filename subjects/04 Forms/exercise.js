@@ -20,22 +20,53 @@ import React from "react";
 import ReactDOM from "react-dom";
 import serializeForm from "form-serialize";
 
+import _ from "lodash";
+
 class CheckoutForm extends React.Component {
+  state = {
+    billingName: '',
+    billigState: '',
+    shippingName: '',
+    shippingState: '',
+    shippingSameAsBilling: false
+  };
+
+  handleSubmit = (evt) => {
+    evt.preventDefault();
+    const values = serializeForm(evt.target, {hash: true});
+    console.log(values);
+  }
+
   render() {
     return (
       <div>
         <h1>Checkout</h1>
-        <form>
+        <form onSubmit={this.handleSubmit}>
           <fieldset>
             <legend>Billing Address</legend>
             <p>
               <label>
-                Billing Name: <input type="text" />
+                Billing Name: <input
+                  name="billingName"
+                  type="text"
+                  defaultValue={this.state.billingName}
+                  onChange={evt => this.setState({
+                    billingName: evt.target.value
+                  })}
+                />
               </label>
             </p>
             <p>
               <label>
-                Billing State: <input type="text" size="2" />
+                Billing State: <input
+                  name="billingState"
+                  type="text"
+                  size="2"
+                  defaultValue={this.state.billingState}
+                  onChange={evt => this.setState({
+                    billingState: evt.target.value
+                  })}
+                />
               </label>
             </p>
           </fieldset>
@@ -44,17 +75,49 @@ class CheckoutForm extends React.Component {
 
           <fieldset>
             <label>
-              <input type="checkbox" /> Same as billing
+              <input
+                type="checkbox"
+                onChange={evt => this.setState({
+                  shippingSameAsBilling: evt.target.checked
+                })}
+              /> Same as billing
             </label>
             <legend>Shipping Address</legend>
             <p>
               <label>
-                Shipping Name: <input type="text" />
+                Shipping Name: <input
+                  type="text"
+                  value={
+                    this.state.shippingSameAsBilling
+                      ? this.state.billingName
+                      : this.state.shippingName
+                  }
+                  onChange={
+                    evt => this.updateShippingInfo({
+                      shippingName: evt.target.value
+                    })
+                  }
+                  readOnly={this.state.shippingSameAsBilling}
+                />
               </label>
             </p>
             <p>
               <label>
-                Shipping State: <input type="text" size="2" />
+                Shipping State: <input
+                  type="text"
+                  size="2"
+                  value={
+                    this.state.shippingSameAsBilling
+                      ? this.state.billingState
+                      : this.state.shippingState
+                  }
+                  onChange={
+                    evt => this.updateShippingInfo({
+                      shippingState: evt.target.value
+                    })
+                  }
+                  readOnly={this.state.shippingSameAsBilling}
+                />
               </label>
             </p>
           </fieldset>
