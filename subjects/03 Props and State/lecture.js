@@ -3,6 +3,11 @@ import "./styles.css";
 import React from "react";
 import ReactDOM from "react-dom";
 
+// Hack to import images
+import carnitas from "./tacos/carnitas.png"
+import pollo from "./tacos/pollo.png"
+import asada from "./tacos/asada.png"
+
 class ContentToggle extends React.Component {
   state = { isOpen: false };
 
@@ -13,6 +18,12 @@ class ContentToggle extends React.Component {
       }
     });
   };
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.isOpen !== this.state.isOpen) {
+      this.setState({isOpen: nextProps.isOpen});
+    }
+  }
 
   render() {
     let summaryClassName = "content-toggle-summary";
@@ -37,21 +48,32 @@ class ContentToggle extends React.Component {
 class App extends React.Component {
   state = {
     tacos: [
-      { id: 0, name: "Carnitas", src: "tacos/carnitas.png" },
-      { id: 1, name: "Pollo", src: "tacos/pollo.png" },
-      { id: 2, name: "Asada", src: "tacos/asada.png" }
-    ]
+      { id: 0, name: "Carnitas", src: carnitas },
+      { id: 1, name: "Pollo", src: pollo },
+      { id: 2, name: "Asada", src: asada }
+    ],
+    allOpen: true
   };
+
+  toggleAll = () => {
+    this.setState({allOpen: !this.state.allOpen});
+  }
 
   render() {
     return (
       <div>
         <div>
+           {this.state.allOpen ? (
+             <button onClick={this.toggleAll}>Close All</button>
+           ) : (
+             <button onClick={this.toggleAll}>Open All</button>
+           )}
           {this.state.tacos.map(taco => (
             <ContentToggle
               key={taco.name}
               style={{ width: 300 }}
               summary={taco.name}
+              isOpen={this.state.allOpen}
             >
               <div
                 style={{
