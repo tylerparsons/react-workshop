@@ -3,42 +3,45 @@ import "./styles.css";
 import React from "react";
 import ReactDOM from "react-dom";
 
-let isOpen = false;
+// Non componentized element with global state
 
-function handleClick() {
-  isOpen = !isOpen;
-  updateThePage();
-}
-
-function ContentToggle() {
-  let summaryClassName = "content-toggle-summary";
-
-  if (isOpen) {
-    summaryClassName += " content-toggle-summary-open";
-  }
-
-  return (
-    <div className="content-toggle">
-      <button onClick={handleClick} className={summaryClassName}>
-        Tacos
-      </button>
-      {isOpen && (
-        <div className="content-toggle-details">
-          <p>
-            A taco is a traditional Mexican dish composed of a corn or
-            wheat tortilla folded or rolled around a filling.
-          </p>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function updateThePage() {
-  ReactDOM.render(<ContentToggle />, document.getElementById("app"));
-}
-
-updateThePage();
+// Uncomment to render this version
+//let isOpen = false;
+//
+//function handleClick() {
+//  isOpen = !isOpen;
+//  updateThePage();
+//}
+//
+//function ContentToggle() {
+//  let summaryClassName = "content-toggle-summary";
+//
+//  if (isOpen) {
+//    summaryClassName += " content-toggle-summary-open";
+//  }
+//
+//  return (
+//    <div className="content-toggle">
+//      <button onClick={handleClick} className={summaryClassName}>
+//        Tacos
+//      </button>
+//      {isOpen && (
+//        <div className="content-toggle-details">
+//          <p>
+//            A taco is a traditional Mexican dish composed of a corn or
+//            wheat tortilla folded or rolled around a filling.
+//          </p>
+//        </div>
+//      )}
+//    </div>
+//  );
+//}
+//
+//function updateThePage() {
+//  ReactDOM.render(<ContentToggle />, document.getElementById("app"));
+//}
+//
+//updateThePage();
 
 ////////////////////////////////////////////////////////////////////////////////
 // Let's encapsulate state in an object and call it what it really is. Then, add
@@ -65,85 +68,87 @@ updateThePage();
 // Side note: Be careful to use the React.Children utility methods.
 // this.props.children is opaque!
 
-// class ContentToggle extends React.Component {
-//   state = {
-//     isOpen: false
-//   };
+class ContentToggle extends React.Component {
+  state = {
+    isOpen: false
+  };
 
-//   handleClick() {
-//     this.setState({ isOpen: !this.state.isOpen }, () => {
-//       if (this.props.onToggle) {
-//         this.props.onToggle();
-//       }
-//     });
-//   }
+  // The handleClick is an instance member here for convenience
+  // of reference later, so that it need not be called on this
+  handleClick = () => {
+    this.setState({ isOpen: !this.state.isOpen }, () => {
+      if (this.props.onToggle) {
+        this.props.onToggle();
+      }
+    });
+  }
 
-//   render() {
-//     let summaryClassName = "content-toggle-summary";
+  render() {
+    let summaryClassName = "content-toggle-summary";
 
-//     if (this.state.isOpen) {
-//       summaryClassName += " content-toggle-summary-open";
-//     }
+    if (this.state.isOpen) {
+      summaryClassName += " content-toggle-summary-open";
+    }
 
-//     return (
-//       <div className="content-toggle">
-//         <button onClick={this.handleClick} className={summaryClassName}>
-//           {this.props.title}
-//         </button>
-//         {this.state.isOpen && (
-//           <div className="content-toggle-details">
-//             {this.props.children}
-//           </div>
-//         )}
-//       </div>
-//     );
-//   }
-// }
+    return (
+      <div className="content-toggle">
+        <button onClick={this.handleClick} className={summaryClassName}>
+          {this.props.title}
+        </button>
+        {this.state.isOpen && (
+          <div className="content-toggle-details">
+            {this.props.children}
+          </div>
+        )}
+      </div>
+    );
+  }
+}
 
-// class ToggleTracker extends React.Component {
-//   state = {
-//     numToggles: 0
-//   };
+class ToggleTracker extends React.Component {
+  state = {
+    numToggles: 0
+  };
 
-//   handleToggle() {
-//     this.setState({
-//       numToggles: this.state.numToggles + 1
-//     });
-//   }
+  handleToggle = () => {
+    this.setState({
+      numToggles: this.state.numToggles + 1
+    });
+  }
 
-//   render() {
-//     const children = React.Children.map(this.props.children, child =>
-//       React.cloneElement(child, {
-//         onToggle: this.handleToggle
-//       })
-//     );
+  render() {
+    const children = React.Children.map(this.props.children, child =>
+      React.cloneElement(child, {
+        onToggle: this.handleToggle
+      })
+    );
 
-//     return (
-//       <div>
-//         <pre>{JSON.stringify(this.state, null, 2)}</pre>
-//         {children}
-//       </div>
-//     );
-//   }
-// }
+    return (
+      <div>
+        <pre>{JSON.stringify(this.state, null, 2)}</pre>
+        {children}
+      </div>
+    );
+  }
+}
 
-// ReactDOM.render(
-//   <ToggleTracker>
-//     <ContentToggle title="Tacos">
-//       <p>
-//         A taco is a traditional Mexican dish composed of a corn or wheat
-//         tortilla folded or rolled around a filling.
-//       </p>
-//     </ContentToggle>
-//     <ContentToggle title="Burritos">
-//       <p>
-//         A burrito is a type of Mexican and Tex-Mex food, consisting of a
-//         wheat flour tortilla wrapped or folded into a cylindrical shape
-//         to completely enclose the filling (in contrast to a taco, which
-//         is generally formed by simply folding a tortilla in half around
-//         a filling, leaving the semicircular perimeter open).
-//       </p>
-//     </ContentToggle>
-//   </ToggleTracker>,
-//   document.getElementById("app")
-// );
+ReactDOM.render(
+  <ToggleTracker>
+    <ContentToggle title="Tacos">
+      <p>
+        A taco is a traditional Mexican dish composed of a corn or wheat
+        tortilla folded or rolled around a filling.
+      </p>
+    </ContentToggle>
+    <ContentToggle title="Burritos">
+      <p>
+        A burrito is a type of Mexican and Tex-Mex food, consisting of a
+        wheat flour tortilla wrapped or folded into a cylindrical shape
+        to completely enclose the filling (in contrast to a taco, which
+        is generally formed by simply folding a tortilla in half around
+        a filling, leaving the semicircular perimeter open).
+      </p>
+    </ContentToggle>
+  </ToggleTracker>,
+  document.getElementById("app")
+);
