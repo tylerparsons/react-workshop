@@ -42,8 +42,85 @@ class Tabs extends React.Component {
   }
 }
 
+class NewTabs extends React.Component {
+  state = {
+    activeIndex: 0
+  };
+
+  render() {
+    return <div>{React.Children.map(this.props.children, (child, index) => {
+        switch (child.type) {
+          case TabList:
+            return React.cloneElement(child, {
+              _activeIndex: this.state.activeIndex,
+              _onSelectTab: (index) => this.setState({
+                activeIndex: index
+              })
+            });
+          case TabPanels:
+            return React.cloneElement(child, {
+              _activeIndex: this.state.activeIndex
+            });
+          default:
+            return child;
+        }
+      })}
+    </div>;
+  }
+}
+
+function TabList({children, _activeIndex, _onSelectTab}) {
+  return <div style={styles.tabList}>
+    {React.Children.map(children, (child, index) =>
+      React.cloneElement(child, {
+        _isActive: index === _activeIndex,
+        _onSelect: () => _onSelectTab(index)
+      })
+    )}
+  </div>;
+}
+
+function Tab({children, _isActive, isDisabled, _onSelect}) {
+  return
+    <div
+      style={
+        isDisabled
+          ? styles.disabledTab
+          : (_isActive ? styles.activeTab : styles.tab)
+      }
+      onClick={isDisabled ? null : _onSelect }
+    >
+      {children}
+    </div>;
+}
+
+function TabPanels({children, _activeIndex}) {
+  return <div style={styles.tabPanels}>
+    {React.Children.toArray(children)[_activeIndex]}
+  </div>;
+}
+
+function TabPanel({children}) {
+  return <div style={styles.tabPanel}>{children}</div>;
+}
+
 class App extends React.Component {
   render() {
+    return (
+      <NewTabs>
+        <TabList>
+          <Tab>Tacos</Tab>
+          <Tab>Burritos</Tab>
+          <Tab>Coconut Korma</Tab>
+        </TabList>
+        <TabPanels>
+          <TabPanel>Tacos are delish</TabPanel>
+          <TabPanel>Burritos are dope</TabPanel>
+          <TabPanel>Coconut Kormas is fire</TabPanel>
+        </TabPanels>
+      </NewTabs>
+    );
+
     const tabData = [
       {
         label: "Tacos",

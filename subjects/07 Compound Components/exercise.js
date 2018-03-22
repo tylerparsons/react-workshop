@@ -32,20 +32,58 @@ class RadioGroup extends React.Component {
     defaultValue: PropTypes.string
   };
 
+  state = {
+    selectedIndex: 0
+  };
+  
   render() {
-    return <div>{this.props.children}</div>;
+    return <div>
+      {React.Children.map(this.props.children, (child, index, children) =>
+        React.cloneElement(child, {
+          isSelected: index === this.state.selectedIndex,
+          onSelected: (value) => this.setState({
+            selectedIndex: index
+          }),
+          onSelectPrev: () => this.setState({
+            selectedIndex: (index - 1 + children.length) % children.length
+          }),
+          onSelectNext: () => this.setState({
+            selectedIndex: (index + 1 + children.length) % children.length
+          })
+        })
+      )}
+    </div>;
   }
 }
 
 class RadioOption extends React.Component {
   static propTypes = {
-    value: PropTypes.string
+    value: PropTypes.string,
+    isSelected: PropTypes.bool
+  };
+
+  handleKeyPress = (evt) => {
+    switch (evt.key) {
+      case "Space":
+      case "Enter":
+        this.props.onSelected();
+        break;
+      case "ArrowUp":
+        this.props.onSelectNext();
+        break;
+      case "ArrowDown":
+        this.props.onSelectPrev();
+        break;
+    }
   };
 
   render() {
     return (
-      <div>
-        <RadioIcon isSelected={false} /> {this.props.children}
+      <div tabIndex="0" onKeyPress={this.handleKeyPress}>
+        <RadioIcon
+          isSelected={this.props.isSelected}
+          onSelected={() => this.props.onSelected(this.props.value)}
+        /> {this.props.children}
       </div>
     );
   }
@@ -69,6 +107,7 @@ class RadioIcon extends React.Component {
           cursor: "pointer",
           background: this.props.isSelected ? "rgba(0, 0, 0, 0.05)" : ""
         }}
+        onClick={this.props.onSelected}
       />
     );
   }
@@ -79,7 +118,6 @@ class App extends React.Component {
     return (
       <div>
         <h1>♬ It's about time that we all turned off the radio ♫</h1>
-
         <RadioGroup defaultValue="fm">
           <RadioOption value="am">AM</RadioOption>
           <RadioOption value="fm">FM</RadioOption>
