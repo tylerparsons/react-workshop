@@ -15,17 +15,47 @@ styles.theremin = {
   display: "inline-block"
 };
 
-class App extends React.Component {
+class Tone extends React.Component {
   componentDidMount() {
     this.oscillator = createOscillator();
+    this.doImperativeWork();
   }
 
+  componentDidUpdate() {
+    this.doImperativeWork();
+  }
+
+  doImperativeWork() {
+    const {isPlaying, pitch, volume } = this.props;
+
+    if (this.props.isPlaying) {
+      this.oscillator.play()
+    } else {
+      this.oscillator.stop()
+    }
+
+    this.oscillator.setPitchBend(this.props.pitch)
+    this.oscillator.setVolume(this.props.volume)
+  }
+
+  render() {
+    return <pre>{JSON.stringify(this.props, null, 2)}</pre>
+  }
+}
+
+class Theremin extends React.Component {
+  state = {
+    isPlaying: false,
+    pitch: 0.2,
+    volume: 0.1
+  };
+
   play = () => {
-    this.oscillator.play();
+    this.setState({isPlaying: true});
   };
 
   stop = () => {
-    this.oscillator.stop();
+    this.setState({isPlaying: false});
   };
 
   changeTone = event => {
@@ -39,20 +69,30 @@ class App extends React.Component {
     const pitch = (clientX - left) / (right - left);
     const volume = 1 - (clientY - top) / (bottom - top);
 
-    this.oscillator.setPitchBend(pitch);
-    this.oscillator.setVolume(volume);
+    this.setState({pitch, volume});
   };
 
   render() {
     return (
+      <div
+        style={styles.theremin}
+        onMouseEnter={this.play}
+        onMouseLeave={this.stop}
+        onMouseMove={this.changeTone}
+      >
+        <Tone {...this.state} />
+      </div>
+    );
+  }
+}
+
+class App extends React.Component {
+  render() {
+    return (
       <div>
         <h1>What does it mean to be declarative?</h1>
-        <div
-          style={styles.theremin}
-          onMouseEnter={this.play}
-          onMouseLeave={this.stop}
-          onMouseMove={this.changeTone}
-        />
+        <Theremin />
+        <Theremin />
       </div>
     );
   }
