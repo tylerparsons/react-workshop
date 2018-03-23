@@ -8,6 +8,8 @@ import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 import "./styles.css";
 
+import _ from "lodash";
+
 class Select extends React.Component {
   static propTypes = {
     onChange: PropTypes.func,
@@ -15,21 +17,65 @@ class Select extends React.Component {
     defaultValue: PropTypes.any
   };
 
+  state = {
+    showOptions: false,
+    value: "dosa"
+  };
+
+  toggleOptions = () => {
+    this.setState({ showOptions: !this.state.showOptions });
+  };
+
+  updateValue(value) {
+    if (this.isControlled()) {
+      this.props.onChange && this.props.onChange(value);
+    } else {
+      this.setState({ value });
+    }
+  }
+
+  isControlled() {
+    return this.props.value != null && this.props.onChange != null;
+  }
+
   render() {
+    const children = this.state.showOptions ? (
+      <div className="options">
+        {React.Children.map(this.props.children, child =>
+          React.cloneElement(child, {
+            onSelected: value => this.updateValue(value)
+          })
+        )}
+      </div>
+    ) : (
+      []
+    );
+
     return (
       <div className="select">
-        <div className="label">
-          label <span className="arrow">▾</span>
+        <div className="label" onClick={this.toggleOptions}>
+          {this.isControlled() ? this.props.value : this.state.value}
+          <span className="arrow">▾</span>
         </div>
-        <div className="options">{this.props.children}</div>
+        {children}
       </div>
     );
   }
 }
 
 class Option extends React.Component {
+  static propTypes = {
+    onSelected: PropTypes.func
+  };
   render() {
-    return <div className="option">{this.props.children}</div>;
+    return (
+      <div
+        className="option"
+        onClick={() => this.props.onSelected(this.props.value)}
+      >
+        {this.props.children}
+      </div>
+    );
   }
 }
 
