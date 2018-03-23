@@ -39,6 +39,55 @@ function withMouse(Component) {
   };
 }
 
+function withCat(Component) {
+  return class extends React.Component {
+    static propTypes = {
+      mouse: PropTypes.shape({
+        x: PropTypes.number.isRequired,
+        y: PropTypes.number.isRequired
+      })
+    };
+
+    state = {
+      mouse: null
+    };
+
+    followMouse() {
+      const { mouse } = this.props;
+      if (mouse) {
+        setTimeout(() => {
+          this.setState({ mouse });
+        }, 200);
+      }
+    }
+
+    componentDidUpdate() {
+      this.followMouse();
+    }
+
+    componentDidMount() {
+      this.followMouse();
+    }
+
+    render() {
+      return (
+        <div>
+          <Component {...this.props} />
+          {this.state.mouse && (
+            <div
+              className="cat"
+              style={{
+                top: this.state.mouse.y,
+                left: this.state.mouse.x
+              }}
+            />
+          )}
+        </div>
+      );
+    }
+  };
+}
+
 class App extends React.Component {
   static propTypes = {
     mouse: PropTypes.shape({
@@ -48,7 +97,7 @@ class App extends React.Component {
   };
 
   render() {
-    const { mouse } = this.props;
+    const { mouse, className } = this.props;
 
     return (
       <div className="container">
@@ -65,5 +114,6 @@ class App extends React.Component {
 }
 
 const AppWithMouse = withMouse(App);
+const AppWithCatAndMouse = withMouse(withCat(App));
 
-ReactDOM.render(<AppWithMouse />, document.getElementById("app"));
+ReactDOM.render(<AppWithCatAndMouse />, document.getElementById("app"));
