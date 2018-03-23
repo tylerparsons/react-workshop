@@ -15,7 +15,28 @@ import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 
 function withMouse(Component) {
-  return Component;
+  return class extends React.Component {
+    state = {
+      mouse: null
+    };
+
+    _onMouseMove = evt => {
+      this.setState({
+        mouse: {
+          x: evt.clientX,
+          y: evt.clientY
+        }
+      });
+    };
+
+    render() {
+      return (
+        <div onMouseMove={this._onMouseMove}>
+          <Component {...this.props} mouse={this.state.mouse} />
+        </div>
+      );
+    }
+  };
 }
 
 class App extends React.Component {
@@ -23,7 +44,7 @@ class App extends React.Component {
     mouse: PropTypes.shape({
       x: PropTypes.number.isRequired,
       y: PropTypes.number.isRequired
-    }).isRequired
+    })
   };
 
   render() {
