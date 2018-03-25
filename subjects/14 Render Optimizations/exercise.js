@@ -24,22 +24,40 @@ class ListView extends React.Component {
     renderRowAtIndex: PropTypes.func.isRequired
   };
 
+  state = {
+    scrollTop: 0
+  };
+
+  handleScroll = evt => {
+    this.setState({
+      scrollTop: evt.target.scrollTop
+    });
+  };
+
   render() {
     const { numRows, rowHeight, renderRowAtIndex } = this.props;
     const totalHeight = numRows * rowHeight;
 
     const items = [];
+    const startIndex = Math.floor(this.state.scrollTop / rowHeight);
+    const endIndex = Math.min(
+      Math.ceil(window.innerHeight / rowHeight) + startIndex,
+      numRows
+    );
 
-    let index = 0;
-    while (index < numRows) {
+    let index = startIndex;
+    while (index < endIndex) {
       items.push(<li key={index}>{renderRowAtIndex(index)}</li>);
       index++;
     }
 
     return (
-      <div style={{ height: "100vh", overflowY: "scroll" }}>
+      <div
+        style={{ height: "100vh", overflowY: "scroll" }}
+        onScroll={this.handleScroll}
+      >
         <div style={{ height: totalHeight }}>
-          <ol>{items}</ol>
+          <ol style={{ paddingTop: this.state.scrollTop }}>{items}</ol>
         </div>
       </div>
     );
@@ -48,7 +66,7 @@ class ListView extends React.Component {
 
 ReactDOM.render(
   <ListView
-    numRows={500}
+    numRows={5000}
     rowHeight={RainbowListDelegate.rowHeight}
     renderRowAtIndex={RainbowListDelegate.renderRowAtIndex}
   />,
